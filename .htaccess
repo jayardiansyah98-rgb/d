@@ -1,0 +1,31 @@
+# ======================================================================
+# Sistem Informasi Pengelolaan Donasi Yayasan
+# Apache Root Directory Configuration
+# ======================================================================
+
+# Matikan index direktori (mencegah Index of /donasi_yayasan)
+Options -Indexes
+
+# Lindungi file-file sensitif agar tidak bisa diakses dari browser
+<FilesMatch "(^\.|\.(env|json|lock|xml|md|dist|yml|yaml|ini|bat|sh)$|^(spark|builds)$)">
+    Require all denied
+</FilesMatch>
+
+# Pengalihan request ke folder public/
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Blokir akses langsung ke folder internal CI4
+    RewriteRule ^(app|vendor|writable|tests|build)(/.*)?$ - [F,L]
+
+    # Jangan lakukan rewrite jika URL sudah menuju folder public/
+    RewriteCond %{REQUEST_URI} !^/donasi_yayasan/public/ [NC]
+
+    # Arahkan URL root ke public/
+    RewriteRule ^$ public/ [L,QSA]
+
+    # Arahkan seluruh file dan rute lain yang tidak ada di root ke public/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
+</IfModule>
